@@ -21,23 +21,21 @@ const db = getDatabase(app);  // Initialize Realtime Database
 // Reference to the 'messages' node in Firebase Realtime Database
 const messagesRef = ref(db, 'messages');
 
-// Display messages in the chat container when they're added to Firebase
-const displayMessages = (snapshot) => {
-  const messagesContainer = document.getElementById('messages');
-  const message = snapshot.val();  // Get message from snapshot
-
-  if (message) {
-    const messageElement = document.createElement('div');
-    messageElement.textContent = message.text;  // Display message text
-    messagesContainer.appendChild(messageElement);
-
-    // Scroll to the bottom to see the newest message
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-  }
+// Generate a random username
+const generateUsername = () => {
+  const adjectives = ['Awesome', 'Crazy', 'Friendly', 'Mighty', 'Happy', 'Funny'];
+  const nouns = ['Lion', 'Tiger', 'Panda', 'Shark', 'Penguin', 'Elephant'];
+  const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
+  return `${randomAdjective}${randomNoun}${Math.floor(Math.random() * 1000)}`;
 };
 
-// Listen for new messages added to Firebase
-onChildAdded(messagesRef, displayMessages);
+// Get or generate the username
+let username = localStorage.getItem('username');
+if (!username) {
+  username = generateUsername();
+  localStorage.setItem('username', username);  // Store username in localStorage
+}
 
 // Send message to Firebase
 const sendMessage = () => {
@@ -47,6 +45,7 @@ const sendMessage = () => {
   if (message) {
     const messageData = {
       text: message,
+      username: username,
       timestamp: Date.now()
     };
 
@@ -59,10 +58,43 @@ const sendMessage = () => {
       })
       .catch((error) => {
         console.error("Error sending message:", error);
-        alert("Error sending message. Check console for details.");  // Show an alert for debugging
+        alert("Error sending message. Check console for details.");
       });
   }
 };
+
+// Display messages in the chat container when they're added to Firebase
+const displayMessages = (snapshot) => {
+  const messagesContainer = document.getElementById('messages');
+  const message = snapshot.val();  // Get message from snapshot
+
+  if (message) {
+    const messageElement = document.createElement('div');
+    
+    // Create a div for the username
+    const usernameElement = document.createElement('div');
+    usernameElement.textContent = message.username;  // Display the username
+    usernameElement.style.fontWeight = 'bold';
+    usernameElement.style.marginBottom = '5px';
+    
+    // Create a div for the message text
+    const messageTextElement = document.createElement('div');
+    messageTextElement.textContent = message.text;  // Display the message text
+
+    // Append the username and message to the message element
+    messageElement.appendChild(usernameElement);
+    messageElement.appendChild(messageTextElement);
+
+    // Append the message to the container
+    messagesContainer.appendChild(messageElement);
+
+    // Scroll to the bottom to see the newest message
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  }
+};
+
+// Listen for new messages added to Firebase
+onChildAdded(messagesRef, displayMessages);
 
 // Attach the sendMessage function to the "Send" button
 const sendButton = document.getElementById('send-btn');

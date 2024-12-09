@@ -14,9 +14,9 @@ body {
 #chat-container {
   display: flex;
   flex-direction: column;
-  width: 100%;
-  max-width: 400px;
-  height: 90%;
+  width: 90%;
+  max-width: 400px; /* Set a maximum width for desktop */
+  height: 80%; /* Fixed height for the chat */
   background-color: #ffffff;
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);

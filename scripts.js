@@ -114,20 +114,40 @@ const displayMessages = (snapshot) => {
     messageTextElement.textContent = message.text;
     messageElement.appendChild(messageTextElement);
 
-    // Add swipe event listener for reply functionality
+    // Swipe gesture tracking
     let startX = 0;
+    let swiped = false;
 
     messageElement.addEventListener('touchstart', (event) => {
       startX = event.touches[0].clientX;
+      swiped = false;
     });
 
     messageElement.addEventListener('touchmove', (event) => {
+      if (swiped) return; // Prevent repeated actions
       const touchX = event.touches[0].clientX;
       const swipeDistance = touchX - startX;
 
-      // Trigger reply on swipe right
-      if (swipeDistance > 50) {
+      if (Math.abs(swipeDistance) > 50) {
+        // Swipe effect
+        messageElement.style.transform = `translateX(${swipeDistance}px)`;
+      }
+    });
+
+    messageElement.addEventListener('touchend', (event) => {
+      const endX = event.changedTouches[0].clientX;
+      const swipeDistance = endX - startX;
+
+      if (Math.abs(swipeDistance) > 50) {
+        // Trigger reply
         startReplying(messageId, message.text);
+        swiped = true;
+
+        // Reset swipe position
+        messageElement.style.transform = 'translateX(0)';
+      } else {
+        // Reset the position if not swiped far enough
+        messageElement.style.transform = 'translateX(0)';
       }
     });
 

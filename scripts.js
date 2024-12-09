@@ -68,7 +68,7 @@ const sendMessage = () => {
       text: message,
       username: username,
       timestamp: Date.now(),
-      replyTo: replyToMessageId || null
+      replyTo: replyToMessageText || null
     };
 
     push(messagesRef, messageData)
@@ -91,6 +91,8 @@ const displayMessages = (snapshot) => {
 
   if (message) {
     const messageElement = document.createElement('div');
+    messageElement.className = 'message';
+    messageElement.dataset.messageId = messageId;
 
     // Username
     const usernameElement = document.createElement('div');
@@ -112,12 +114,22 @@ const displayMessages = (snapshot) => {
     messageTextElement.textContent = message.text;
     messageElement.appendChild(messageTextElement);
 
-    // Reply button
-    const replyButton = document.createElement('button');
-    replyButton.textContent = 'Reply';
-    replyButton.style.marginLeft = '10px';
-    replyButton.addEventListener('click', () => startReplying(messageId, message.text));
-    messageElement.appendChild(replyButton);
+    // Add swipe event listener for reply functionality
+    let startX = 0;
+
+    messageElement.addEventListener('touchstart', (event) => {
+      startX = event.touches[0].clientX;
+    });
+
+    messageElement.addEventListener('touchmove', (event) => {
+      const touchX = event.touches[0].clientX;
+      const swipeDistance = touchX - startX;
+
+      // Trigger reply on swipe right
+      if (swipeDistance > 50) {
+        startReplying(messageId, message.text);
+      }
+    });
 
     // Add the message to the container
     messagesContainer.appendChild(messageElement);

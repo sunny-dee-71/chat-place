@@ -44,7 +44,7 @@ const sendMessage = () => {
 
   // Check if the username exceeds 20 characters
   if (username.length > 19) {
-    alert("Username is too long (max 20 characters). Please update your username. Your User Name is: ") + username;
+    alert("Username is too long (max 20 characters). Please update your username. Your User Name is: "  + localStorage.username.toString());
     return;  // Stop the function from continuing
   }
 

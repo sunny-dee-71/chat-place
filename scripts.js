@@ -27,7 +27,7 @@ const generateUsername = () => {
   const nouns = ['Lion', 'Tiger', 'Panda', 'Shark', 'Penguin', 'Elephant'];
   const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
   const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
-  return ${randomAdjective}${randomNoun}${Math.floor(Math.random() * 1000)};
+  return `${randomAdjective}${randomNoun}${Math.floor(Math.random() * 1000)}`;
 };
 
 // Get or generate the username

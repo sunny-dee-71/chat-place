@@ -16,7 +16,7 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);  // Initialize Realtime Database
+const db = getDatabase(app); // Initialize Realtime Database
 
 // Reference to the 'messages' node in Firebase Realtime Database
 const messagesRef = ref(db, 'messages');
@@ -34,27 +34,30 @@ const generateUsername = () => {
 let username = localStorage.getItem('username');
 if (!username) {
   username = generateUsername();
-  localStorage.setItem('username', username);  // Store username in localStorage
+  localStorage.setItem('username', username); // Store username in localStorage
 }
+
+// State for replying to a message
+let replyToMessage = null;
 
 // Send message to Firebase
 const sendMessage = () => {
   const messageInput = document.getElementById('message-input');
-  const message = messageInput.value.trim();  // Clean up whitespace
+  const message = messageInput.value.trim(); // Clean up whitespace
 
   if (message) {
     const messageData = {
       text: message,
       username: username,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      replyTo: replyToMessage ? replyToMessage.id : null // Attach replyTo ID if replying
     };
-
-    console.log("Sending message to Firebase:", messageData);  // Log what we're sending
 
     push(messagesRef, messageData)
       .then(() => {
-        console.log("Message successfully pushed to Firebase");
-        messageInput.value = '';  // Clear input after sending
+        messageInput.value = ''; // Clear input after sending
+        replyToMessage = null; // Clear reply state
+        updateReplyBanner(); // Hide reply banner
       })
       .catch((error) => {
         console.error("Error sending message:", error);
@@ -63,32 +66,61 @@ const sendMessage = () => {
   }
 };
 
+// Update the reply banner
+const updateReplyBanner = () => {
+  const replyBanner = document.getElementById('reply-banner');
+  if (replyToMessage) {
+    replyBanner.style.display = 'block';
+    replyBanner.textContent = `Replying to: ${replyToMessage.text}`;
+  } else {
+    replyBanner.style.display = 'none';
+  }
+};
+
 // Display messages in the chat container when they're added to Firebase
 const displayMessages = (snapshot) => {
   const messagesContainer = document.getElementById('messages');
-  const message = snapshot.val();  // Get message from snapshot
+  const message = snapshot.val();
+  const id = snapshot.key;
 
   if (message) {
     const messageElement = document.createElement('div');
-    
+    messageElement.className = 'message';
+
     // Create a div for the username
     const usernameElement = document.createElement('div');
-    usernameElement.textContent = message.username;  // Display the username
+    usernameElement.textContent = message.username;
     usernameElement.style.fontWeight = 'bold';
     usernameElement.style.marginBottom = '5px';
-    
+
     // Create a div for the message text
     const messageTextElement = document.createElement('div');
-    messageTextElement.textContent = message.text;  // Display the message text
+    messageTextElement.textContent = message.text;
 
-    // Append the username and message to the message element
+    // Show the message being replied to (if any)
+    if (message.replyTo) {
+      const replyPreview = document.createElement('div');
+      replyPreview.className = 'reply-preview';
+      replyPreview.textContent = `Replying to: ${document.getElementById(message.replyTo)?.textContent || 'Message not found'}`;
+      messageElement.appendChild(replyPreview);
+    }
+
+    // Add a reply button
+    const replyButton = document.createElement('button');
+    replyButton.textContent = 'Reply';
+    replyButton.className = 'reply-btn';
+    replyButton.addEventListener('click', () => {
+      replyToMessage = { id, text: message.text };
+      updateReplyBanner();
+    });
+
+    // Append elements to the message container
     messageElement.appendChild(usernameElement);
     messageElement.appendChild(messageTextElement);
+    messageElement.appendChild(replyButton);
 
-    // Append the message to the container
+    // Append the message element to the container
     messagesContainer.appendChild(messageElement);
-
-    // Scroll to the bottom to see the newest message
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
   }
 };

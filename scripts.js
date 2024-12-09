@@ -2,7 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-// Firebase configuration (replace with your actual credentials from Firebase Console)
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCvkwIdF7Uc1ga-O0j6jMniJ0CgSDIlM7U",
   authDomain: "chat-place-e2479.firebaseapp.com",
@@ -16,9 +16,7 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const db = getDatabase(app); // Initialize Realtime Database
-
-// Reference to the 'messages' node in Firebase Realtime Database
+const db = getDatabase(app);
 const messagesRef = ref(db, 'messages');
 
 // Generate a random username
@@ -30,34 +28,36 @@ const generateUsername = () => {
   return `${randomAdjective}${randomNoun}${Math.floor(Math.random() * 1000)}`;
 };
 
-// Get or generate the username
 let username = localStorage.getItem('username');
 if (!username) {
   username = generateUsername();
-  localStorage.setItem('username', username); // Store username in localStorage
+  localStorage.setItem('username', username);
 }
 
-// State for replying to a message
 let replyToMessage = null;
 
-// Send message to Firebase
+// Send a message to Firebase
 const sendMessage = () => {
   const messageInput = document.getElementById('message-input');
-  const message = messageInput.value.trim(); // Clean up whitespace
+  const message = messageInput.value.trim();
 
   if (message) {
     const messageData = {
       text: message,
       username: username,
       timestamp: Date.now(),
-      replyTo: replyToMessage ? replyToMessage.id : null // Attach replyTo ID if replying
+      replyTo: replyToMessage ? {
+        id: replyToMessage.id,
+        text: replyToMessage.text,
+        username: replyToMessage.username
+      } : null
     };
 
     push(messagesRef, messageData)
       .then(() => {
-        messageInput.value = ''; // Clear input after sending
-        replyToMessage = null; // Clear reply state
-        updateReplyBanner(); // Hide reply banner
+        messageInput.value = '';
+        replyToMessage = null;
+        updateReplyBanner();
       })
       .catch((error) => {
         console.error("Error sending message:", error);
@@ -71,13 +71,13 @@ const updateReplyBanner = () => {
   const replyBanner = document.getElementById('reply-banner');
   if (replyToMessage) {
     replyBanner.style.display = 'block';
-    replyBanner.textContent = `Replying to: ${replyToMessage.text}`;
+    replyBanner.textContent = `Replying to: "${replyToMessage.text}" by ${replyToMessage.username}`;
   } else {
     replyBanner.style.display = 'none';
   }
 };
 
-// Display messages in the chat container when they're added to Firebase
+// Display messages in the chat container
 const displayMessages = (snapshot) => {
   const messagesContainer = document.getElementById('messages');
   const message = snapshot.val();
@@ -87,21 +87,19 @@ const displayMessages = (snapshot) => {
     const messageElement = document.createElement('div');
     messageElement.className = 'message';
 
-    // Create a div for the username
     const usernameElement = document.createElement('div');
     usernameElement.textContent = message.username;
     usernameElement.style.fontWeight = 'bold';
     usernameElement.style.marginBottom = '5px';
 
-    // Create a div for the message text
     const messageTextElement = document.createElement('div');
     messageTextElement.textContent = message.text;
 
-    // Show the message being replied to (if any)
+    // Show the reply preview if the message is a reply
     if (message.replyTo) {
       const replyPreview = document.createElement('div');
       replyPreview.className = 'reply-preview';
-      replyPreview.textContent = `Replying to: ${document.getElementById(message.replyTo)?.textContent || 'Message not found'}`;
+      replyPreview.textContent = `Replying to: "${message.replyTo.text}" by ${message.replyTo.username}`;
       messageElement.appendChild(replyPreview);
     }
 
@@ -110,22 +108,20 @@ const displayMessages = (snapshot) => {
     replyButton.textContent = 'Reply';
     replyButton.className = 'reply-btn';
     replyButton.addEventListener('click', () => {
-      replyToMessage = { id, text: message.text };
+      replyToMessage = { id, text: message.text, username: message.username };
       updateReplyBanner();
     });
 
-    // Append elements to the message container
     messageElement.appendChild(usernameElement);
     messageElement.appendChild(messageTextElement);
     messageElement.appendChild(replyButton);
 
-    // Append the message element to the container
     messagesContainer.appendChild(messageElement);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
   }
 };
 
-// Listen for new messages added to Firebase
+// Listen for new messages
 onChildAdded(messagesRef, displayMessages);
 
 // Attach the sendMessage function to the "Send" button

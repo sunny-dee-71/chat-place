@@ -21,21 +21,26 @@ const db = getDatabase(app);  // Initialize Realtime Database
 // Reference to 'messages' node in Firebase Realtime Database
 const messagesRef = ref(db, 'messages');
 
-// Send message function
 const sendMessage = () => {
   const messageInput = document.getElementById('message-input');
-  const message = messageInput.value.trim();  // Trim spaces
+  const message = messageInput.value.trim();  // Clean up whitespace
 
   if (message) {
     // Push message to Firebase
     push(messagesRef, {
       text: message,
       timestamp: Date.now()
+    })
+    .then(() => {
+      console.log("Message sent to Firebase");
+      messageInput.value = '';  // Clear input after sending
+    })
+    .catch((error) => {
+      console.error("Error sending message:", error);
     });
-
-    messageInput.value = '';  // Clear input field after sending
   }
 };
+
 
 // Display messages in the chat container
 const displayMessages = (snapshot) => {

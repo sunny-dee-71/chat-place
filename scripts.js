@@ -16,7 +16,7 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);  // Initialize Realtime Database
+const db = getDatabase(app);
 
 // Reference to the 'messages' node in Firebase
 const messagesRef = ref(db, 'messages');
@@ -58,7 +58,7 @@ const cancelReply = () => {
   replyBanner.style.display = 'none';
 };
 
-// Send message to Firebase
+// Send a message to Firebase
 const sendMessage = () => {
   const messageInput = document.getElementById('message-input');
   const message = messageInput.value.trim();
@@ -68,13 +68,13 @@ const sendMessage = () => {
       text: message,
       username: username,
       timestamp: Date.now(),
-      replyTo: replyToMessageId || null  // Include replyTo if replying to a message
+      replyTo: replyToMessageId || null
     };
 
     push(messagesRef, messageData)
       .then(() => {
         messageInput.value = '';
-        cancelReply();  // Reset reply state
+        cancelReply();
       })
       .catch((error) => {
         console.error("Error sending message:", error);
@@ -91,7 +91,7 @@ const displayMessages = (snapshot) => {
 
   if (message) {
     const messageElement = document.createElement('div');
-    
+
     // Username
     const usernameElement = document.createElement('div');
     usernameElement.textContent = message.username;
@@ -99,9 +99,9 @@ const displayMessages = (snapshot) => {
     messageElement.appendChild(usernameElement);
 
     // Reply-to message (if applicable)
-    if (message.replyTo && replyToMessageText) {
+    if (message.replyTo) {
       const replyToElement = document.createElement('div');
-      replyToElement.textContent = `Replying to: "${replyToMessageText}"`;
+      replyToElement.textContent = `Replying to: "${message.replyTo}"`;
       replyToElement.style.fontStyle = 'italic';
       replyToElement.style.color = '#888';
       messageElement.appendChild(replyToElement);
@@ -121,7 +121,7 @@ const displayMessages = (snapshot) => {
 
     // Add the message to the container
     messagesContainer.appendChild(messageElement);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;  // Scroll to the bottom
+    messagesContainer.scrollTop = messagesContainer.scrollHeight; // Scroll to the bottom
   }
 };
 

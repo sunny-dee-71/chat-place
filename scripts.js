@@ -1,13 +1,15 @@
 // Firebase configuration (replace with your Firebase config)
 const firebaseConfig = {
-  apiKey: "your-api-key",
-  authDomain: "your-project-id.firebaseapp.com",
-  databaseURL: "https://your-project-id.firebaseio.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project-id.appspot.com",
-  messagingSenderId: "your-sender-id",
-  appId: "your-app-id"
-};
+    apiKey: "AIzaSyCvkwIdF7Uc1ga-O0j6jMniJ0CgSDIlM7U",
+    authDomain: "chat-place-e2479.firebaseapp.com",
+    databaseURL: "https://chat-place-e2479-default-rtdb.firebaseio.com",
+    projectId: "chat-place-e2479",
+    storageBucket: "chat-place-e2479.firebasestorage.app",
+    messagingSenderId: "201517086579",
+    appId: "1:201517086579:web:c2404d1df36ac01134b706",
+    measurementId: "G-ESCMY4GS2J"
+  };
+
 
 // Initialize Firebase
 const app = firebase.initializeApp(firebaseConfig);

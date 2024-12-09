@@ -2,13 +2,13 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-// Firebase configuration (replace with your actual credentials from Firebase Console)
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCvkwIdF7Uc1ga-O0j6jMniJ0CgSDIlM7U",
   authDomain: "chat-place-e2479.firebaseapp.com",
   databaseURL: "https://chat-place-e2479-default-rtdb.firebaseio.com",
   projectId: "chat-place-e2479",
-  storageBucket: "chat-place-e2479.firebasestorage.app",
+  storageBucket: "chat-place-e2479.appspot.com",
   messagingSenderId: "201517086579",
   appId: "1:201517086579:web:c2404d1df36ac01134b706",
   measurementId: "G-ESCMY4GS2J"
@@ -18,84 +18,116 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);  // Initialize Realtime Database
 
-// Reference to the 'messages' node in Firebase Realtime Database
+// Reference to the 'messages' node in Firebase
 const messagesRef = ref(db, 'messages');
 
 // Generate a random username
 const generateUsername = () => {
   const adjectives = ['Awesome', 'Crazy', 'Friendly', 'Mighty', 'Happy', 'Funny'];
   const nouns = ['Lion', 'Tiger', 'Panda', 'Shark', 'Penguin', 'Elephant'];
-  const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
-  const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
-  return `${randomAdjective}${randomNoun}${Math.floor(Math.random() * 1000)}`;
+  return `${adjectives[Math.floor(Math.random() * adjectives.length)]}${nouns[Math.floor(Math.random() * nouns.length)]}${Math.floor(Math.random() * 1000)}`;
 };
 
 // Get or generate the username
 let username = localStorage.getItem('username');
 if (!username) {
   username = generateUsername();
-  localStorage.setItem('username', username);  // Store username in localStorage
+  localStorage.setItem('username', username);
 }
+
+// State to track if replying
+let replyToMessageId = null;
+let replyToMessageText = null;
+
+// Start the reply process
+const startReplying = (messageId, originalMessage) => {
+  replyToMessageId = messageId;
+  replyToMessageText = originalMessage;
+
+  const replyBanner = document.getElementById('reply-banner');
+  document.getElementById('replying-to-text').textContent = `Replying to: "${originalMessage}"`;
+  replyBanner.style.display = 'block';
+};
+
+// Cancel the reply process
+const cancelReply = () => {
+  replyToMessageId = null;
+  replyToMessageText = null;
+
+  const replyBanner = document.getElementById('reply-banner');
+  replyBanner.style.display = 'none';
+};
 
 // Send message to Firebase
 const sendMessage = () => {
   const messageInput = document.getElementById('message-input');
-  const message = messageInput.value.trim();  // Clean up whitespace
+  const message = messageInput.value.trim();
 
   if (message) {
     const messageData = {
       text: message,
       username: username,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      replyTo: replyToMessageId || null  // Include replyTo if replying to a message
     };
-
-    console.log("Sending message to Firebase:", messageData);  // Log what we're sending
 
     push(messagesRef, messageData)
       .then(() => {
-        console.log("Message successfully pushed to Firebase");
-        messageInput.value = '';  // Clear input after sending
+        messageInput.value = '';
+        cancelReply();  // Reset reply state
       })
       .catch((error) => {
         console.error("Error sending message:", error);
-        alert("Error sending message. Check console for details.");
+        alert("Error sending message.");
       });
   }
 };
 
-// Display messages in the chat container when they're added to Firebase
+// Display messages
 const displayMessages = (snapshot) => {
   const messagesContainer = document.getElementById('messages');
-  const message = snapshot.val();  // Get message from snapshot
+  const message = snapshot.val();
+  const messageId = snapshot.key;
 
   if (message) {
     const messageElement = document.createElement('div');
     
-    // Create a div for the username
+    // Username
     const usernameElement = document.createElement('div');
-    usernameElement.textContent = message.username;  // Display the username
+    usernameElement.textContent = message.username;
     usernameElement.style.fontWeight = 'bold';
-    usernameElement.style.marginBottom = '5px';
-    
-    // Create a div for the message text
-    const messageTextElement = document.createElement('div');
-    messageTextElement.textContent = message.text;  // Display the message text
-
-    // Append the username and message to the message element
     messageElement.appendChild(usernameElement);
+
+    // Reply-to message (if applicable)
+    if (message.replyTo && replyToMessageText) {
+      const replyToElement = document.createElement('div');
+      replyToElement.textContent = `Replying to: "${replyToMessageText}"`;
+      replyToElement.style.fontStyle = 'italic';
+      replyToElement.style.color = '#888';
+      messageElement.appendChild(replyToElement);
+    }
+
+    // Message text
+    const messageTextElement = document.createElement('div');
+    messageTextElement.textContent = message.text;
     messageElement.appendChild(messageTextElement);
 
-    // Append the message to the container
-    messagesContainer.appendChild(messageElement);
+    // Reply button
+    const replyButton = document.createElement('button');
+    replyButton.textContent = 'Reply';
+    replyButton.style.marginLeft = '10px';
+    replyButton.addEventListener('click', () => startReplying(messageId, message.text));
+    messageElement.appendChild(replyButton);
 
-    // Scroll to the bottom to see the newest message
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    // Add the message to the container
+    messagesContainer.appendChild(messageElement);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;  // Scroll to the bottom
   }
 };
 
-// Listen for new messages added to Firebase
+// Listen for new messages
 onChildAdded(messagesRef, displayMessages);
 
-// Attach the sendMessage function to the "Send" button
+// Attach send button event listener
 const sendButton = document.getElementById('send-btn');
 sendButton.addEventListener('click', sendMessage);

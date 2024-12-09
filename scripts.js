@@ -42,6 +42,12 @@ const sendMessage = () => {
   const messageInput = document.getElementById('message-input');
   const message = messageInput.value.trim();  // Clean up whitespace
 
+  // Check if the username exceeds 20 characters
+  if (username.length > 15) {
+    alert("Username is too long (max 20 characters). Please update your username.");
+    return;  // Stop the function from continuing
+  }
+
   if (message) {
     const messageData = {
       text: message,

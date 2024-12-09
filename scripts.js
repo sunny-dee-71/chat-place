@@ -2,7 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-// Firebase configuration
+// Firebase configuration (replace with your actual credentials from Firebase Console)
 const firebaseConfig = {
   apiKey: "AIzaSyCvkwIdF7Uc1ga-O0j6jMniJ0CgSDIlM7U",
   authDomain: "chat-place-e2479.firebaseapp.com",
@@ -18,52 +18,52 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);  // Initialize Realtime Database
 
-// Reference to 'messages' node in Firebase Realtime Database
+// Reference to the 'messages' node in Firebase Realtime Database
 const messagesRef = ref(db, 'messages');
 
-const sendMessage = () => {
-  const messageInput = document.getElementById('message-input');
-  const message = messageInput.value.trim();  // Clean up whitespace
-
-  if (message) {
-    // Push message to Firebase
-    push(messagesRef, {
-      text: message,
-      timestamp: Date.now()
-    })
-    .then(() => {
-      console.log("Message sent to Firebase");
-      messageInput.value = '';  // Clear input after sending
-    })
-    .catch((error) => {
-      console.error("Error sending message:", error);
-    });
-  }
-};
-
-
-// Display messages in the chat container
+// Display messages in the chat container when they're added to Firebase
 const displayMessages = (snapshot) => {
   const messagesContainer = document.getElementById('messages');
   const message = snapshot.val();  // Get message from snapshot
 
-  const messageElement = document.createElement('div');
-  messageElement.textContent = message.text;  // Display message text
-  messagesContainer.appendChild(messageElement);
+  if (message) {
+    const messageElement = document.createElement('div');
+    messageElement.textContent = message.text;  // Display message text
+    messagesContainer.appendChild(messageElement);
 
-  // Scroll to the bottom to see the newest message
-  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    // Scroll to the bottom to see the newest message
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  }
 };
 
 // Listen for new messages added to Firebase
 onChildAdded(messagesRef, displayMessages);
 
-// Event listener for Send button
-document.getElementById('send-btn').addEventListener('click', sendMessage);
+// Send message to Firebase
+const sendMessage = () => {
+  const messageInput = document.getElementById('message-input');
+  const message = messageInput.value.trim();  // Clean up whitespace
 
-// Optional: Allow pressing Enter to send the message
-document.getElementById('message-input').addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') {
-    sendMessage();
+  if (message) {
+    const messageData = {
+      text: message,
+      timestamp: Date.now()
+    };
+
+    console.log("Sending message to Firebase:", messageData);  // Log what we're sending
+
+    push(messagesRef, messageData)
+      .then(() => {
+        console.log("Message successfully pushed to Firebase");
+        messageInput.value = '';  // Clear input after sending
+      })
+      .catch((error) => {
+        console.error("Error sending message:", error);
+        alert("Error sending message. Check console for details.");  // Show an alert for debugging
+      });
   }
-});
+};
+
+// Attach the sendMessage function to the "Send" button
+const sendButton = document.getElementById('send-btn');
+sendButton.addEventListener('click', sendMessage);

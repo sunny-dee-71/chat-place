@@ -2,7 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-// Firebase configuration (replace with your actual credentials from Firebase Console)
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCvkwIdF7Uc1ga-O0j6jMniJ0CgSDIlM7U",
   authDomain: "chat-place-e2479.firebaseapp.com",
@@ -37,6 +37,18 @@ if (!username) {
   localStorage.setItem('username', username);  // Store username in localStorage
 }
 
+// Fetch the user's IP address
+let userIP = null;
+fetch('https://api.ipify.org?format=json')
+  .then((response) => response.json())
+  .then((data) => {
+    userIP = data.ip;  // Save the user's IP address
+    console.log('User IP:', userIP);
+  })
+  .catch((error) => {
+    console.error('Error fetching IP address:', error);
+  });
+
 // Send message to Firebase
 const sendMessage = () => {
   const messageInput = document.getElementById('message-input');
@@ -46,6 +58,7 @@ const sendMessage = () => {
     const messageData = {
       text: message,
       username: username,
+      ip: userIP || 'Unknown IP',  // Include the user's IP address
       timestamp: Date.now()
     };
 
@@ -81,9 +94,16 @@ const displayMessages = (snapshot) => {
     const messageTextElement = document.createElement('div');
     messageTextElement.textContent = message.text;  // Display the message text
 
-    // Append the username and message to the message element
+    // Create a div for the IP address
+    const ipElement = document.createElement('div');
+    ipElement.textContent = `IP: ${message.ip}`;
+    ipElement.style.fontSize = '0.8em';
+    ipElement.style.color = '#888';
+
+    // Append the username, message, and IP to the message element
     messageElement.appendChild(usernameElement);
     messageElement.appendChild(messageTextElement);
+    messageElement.appendChild(ipElement);
 
     // Append the message to the container
     messagesContainer.appendChild(messageElement);

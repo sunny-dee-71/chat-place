@@ -82,42 +82,10 @@ const displayMessages = (snapshot) => {
     const usernameElement = document.createElement('div');
     
     if (message.username.length > 19){
-
-      usernameElement.textContent = "Message Marked As Spam";  // Display the username
-      usernameElement.style.fontWeight = 'bold';
-      usernameElement.style.marginBottom = '5px';
-
-      const messageTextElement = document.createElement('div');
-      messageTextElement.textContent = "Message Marked As Spam";  // Display the message text
-
-      messageElement.appendChild(usernameElement);
-      messageElement.appendChild(messageTextElement);
-
-      // Append the message to the container
-      messagesContainer.appendChild(messageElement);
-
-      // Scroll to the bottom to see the newest message
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
       return;
     }
 
     if (message.text.length > 540){
-
-      usernameElement.textContent = "Message Marked As Spam";  // Display the username
-      usernameElement.style.fontWeight = 'bold';
-      usernameElement.style.marginBottom = '5px';
-
-      const messageTextElement = document.createElement('div');
-      messageTextElement.textContent = "Message Marked As Spam";  // Display the message text
-
-      messageElement.appendChild(usernameElement);
-      messageElement.appendChild(messageTextElement);
-
-      // Append the message to the container
-      messagesContainer.appendChild(messageElement);
-
-      // Scroll to the bottom to see the newest message
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
       return;
     }
 

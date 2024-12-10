@@ -77,8 +77,28 @@ const displayMessages = (snapshot) => {
   if (message) {
     const messageElement = document.createElement('div');
     
+    
     // Create a div for the username
     const usernameElement = document.createElement('div');
+    if (message.username.length > 19){
+
+      usernameElement.textContent = "Message Marked As Spam";  // Display the username
+      usernameElement.style.fontWeight = 'bold';
+      usernameElement.style.marginBottom = '5px';
+
+      const messageTextElement = document.createElement('div');
+      messageTextElement.textContent = "Message Marked As Spam";  // Display the message text
+
+      messageElement.appendChild(usernameElement);
+      messageElement.appendChild(messageTextElement);
+
+      // Append the message to the container
+      messagesContainer.appendChild(messageElement);
+
+      // Scroll to the bottom to see the newest message
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      return;
+    }
     usernameElement.textContent = message.username;  // Display the username
     usernameElement.style.fontWeight = 'bold';
     usernameElement.style.marginBottom = '5px';

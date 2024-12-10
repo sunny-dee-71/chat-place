@@ -88,6 +88,10 @@ const displayMessages = (snapshot) => {
     if (message.text.length > 540){
       return;
     }
+    
+    if (message.text.length < 2){
+      return;
+    }
 
 
     

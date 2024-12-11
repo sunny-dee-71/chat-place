@@ -82,14 +82,17 @@ const displayMessages = (snapshot) => {
     const usernameElement = document.createElement('div');
     
     if (message.username.length > 19){
+      message.remove();
       return;
     }
 
     if (message.text.length > 540){
+      message.remove();
       return;
     }
     
     if (message.text.length < 2){
+      message.remove();
       return;
     }
 

@@ -21,6 +21,11 @@ const db = getDatabase(app);  // Initialize Realtime Database
 // Reference to the 'messages' node in Firebase Realtime Database
 const messagesRef = ref(db, 'messages');
 
+
+//to check if uppercase
+const isUpperCase = str => str === str.toUpperCase();
+
+
 // Generate a random username
 const generateUsername = () => {
   const adjectives = ['Awesome', 'Crazy', 'Friendly', 'Mighty', 'Happy', 'Funny', 'Sigma'];
@@ -90,6 +95,10 @@ const displayMessages = (snapshot) => {
     }
     
     if (message.text.length < 2){
+      return;
+    }
+
+    if (isUpperCase(message.text){
       return;
     }
 

@@ -22,10 +22,6 @@ const db = getDatabase(app);  // Initialize Realtime Database
 const messagesRef = ref(db, 'messages');
 
 
-//to check if uppercase
-const isUpperCase = str => str === str.toUpperCase();
-
-
 // Generate a random username
 const generateUsername = () => {
   const adjectives = ['Awesome', 'Crazy', 'Friendly', 'Mighty', 'Happy', 'Funny', 'Sigma'];
@@ -78,6 +74,9 @@ const sendMessage = () => {
 const displayMessages = (snapshot) => {
   const messagesContainer = document.getElementById('messages');
   const message = snapshot.val();  // Get message from snapshot
+  
+  //to check if uppercase
+  const isUpperCase = str => str === str.toUpperCase();
 
   if (message) {
     const messageElement = document.createElement('div');

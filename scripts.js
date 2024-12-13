@@ -97,7 +97,7 @@ const displayMessages = (snapshot) => {
       return;
     }
 
-    if (isUpperCase(message.text){
+    if (isUpperCase(message.text)){
       return;
     }
 

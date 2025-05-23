@@ -109,7 +109,7 @@ const displayMessages = (snapshot) => {
     
     // Create a div for the message text
     const messageTextElement = document.createElement('div');
-    messageTextElement.textContent = message.text;  // Display the message text
+    messageTextElement.innerHTML = message.text;  // Display the message text
 
     // Append the username and message to the message element
     messageElement.appendChild(usernameElement);
